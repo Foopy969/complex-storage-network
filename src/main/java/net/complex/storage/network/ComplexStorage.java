@@ -18,8 +18,8 @@ public class ComplexStorage implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-        Registry.register(Registry.BLOCK, new Identifier("complexstorage", "data_duct"), DATA_DUCT);
-        Registry.register(Registry.ITEM, new Identifier("complexstorage", "data_duct"), new BlockItem(DATA_DUCT, new Item.Settings().group(ItemGroup.MISC)));
+        Registry.register(Registry.BLOCK, new Identifier("complexstorage", "dataduct"), DATA_DUCT);
+        Registry.register(Registry.ITEM, new Identifier("complexstorage", "dataduct"), new BlockItem(DATA_DUCT, new Item.Settings().group(ItemGroup.MISC)));
         Registry.register(Registry.ITEM, new Identifier("complexstorage", "test_item"), TEST_ITEM);
 	}
 }
