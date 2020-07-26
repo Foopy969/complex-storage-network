@@ -68,13 +68,11 @@ public class CableBlock extends Block {
     public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
         updateModel(world, pos, state);
         world.updateNeighborsAlways(pos, this);
-        return;
     }
     
     @Override
     public void neighborUpdate(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
         updateModel(world, pos, state);
-        return;
     }
 
     @Override
@@ -96,7 +94,6 @@ public class CableBlock extends Block {
             state = state.with(entry.getValue(), getConnect(world.getBlockState(pos.offset(entry.getKey()))));
         }
         world.setBlockState(pos, state);
-        return;
     }
 
     public List<Inventory> getConnectedInventories(World world, BlockPos to, BlockPos from, int depth){
@@ -116,6 +113,8 @@ public class CableBlock extends Block {
                 fetchedInventories.add(ChestBlock.getInventory((ChestBlock) tempBlockState.getBlock(), tempBlockState, world, tempPos, false));
             }else if (isCable(tempBlockState)){
                 fetchedInventories.addAll(getConnectedInventories(world, tempPos, to, depth - 1));
+            }else if (isMaster(tempBlockState)){
+                return fetchedInventories;
             }
         }
         return fetchedInventories;
@@ -124,7 +123,7 @@ public class CableBlock extends Block {
     public static ConnectType getConnect(BlockState entry){
         if (entry == null) return ConnectType.NONE;
         if (isChest(entry)) return ConnectType.INVENTORY;
-        else if (isCable(entry)) return ConnectType.CABLE;
+        else if (isCable(entry) || isMaster(entry)) return ConnectType.CABLE;
         else return ConnectType.NONE;
     }
 
@@ -135,6 +134,11 @@ public class CableBlock extends Block {
 
     public static boolean isCable(BlockState blockState){
         if (blockState.getBlock() instanceof CableBlock) return true;
+        else return false;
+    }
+
+    public static boolean isMaster(BlockState blockState){
+        if (blockState.getBlock() instanceof MasterBlock) return true;
         else return false;
     }
 
