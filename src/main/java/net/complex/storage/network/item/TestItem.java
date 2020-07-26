@@ -13,8 +13,6 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
 public class TestItem extends Item {
@@ -31,16 +29,6 @@ public class TestItem extends Item {
 
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
-        World world = context.getWorld();
-        BlockPos pos = context.getBlockPos();
-        BlockState blockState = world.getBlockState(pos);
-        Block block = blockState.getBlock();
-        List<Inventory> inventories;
-
-        if (Registry.BLOCK.getId(blockState.getBlock()).toString().equals("complexstorage:dataduct")){
-            inventories = ((CableBlock)block).getConnectedInventories(world, pos, null, 16);
-        }
-        
         return ActionResult.PASS;
     }
 }

@@ -1,9 +1,11 @@
 package net.complex.storage.network.block;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import blue.endless.jankson.annotation.Nullable;
 import net.minecraft.block.Block;
@@ -96,10 +98,10 @@ public class CableBlock extends Block {
         world.setBlockState(pos, state);
     }
 
-    public List<Inventory> getConnectedInventories(World world, BlockPos to, BlockPos from, int depth){
+    public Set<Inventory> getConnectedInventories(World world, BlockPos to, BlockPos from, int depth){
         BlockPos tempPos;
         BlockState tempBlockState;
-        List<Inventory> fetchedInventories = new ArrayList<Inventory>();
+        Set<Inventory> fetchedInventories = new HashSet<Inventory>();
         //max depth reached
         if (depth == 0) return fetchedInventories;
 
