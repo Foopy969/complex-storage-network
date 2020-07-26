@@ -1,4 +1,4 @@
-package net.complex.storage.network;
+package net.complex.storage.network.block;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,8 +35,8 @@ public class CableBlock extends Block {
 
     public static final Map<Direction, EnumProperty<ConnectType>> FACING_TO_PROPERTY_MAP = Map.of(
         Direction.NORTH, NORTH,
-        Direction.EAST, EAST,
         Direction.SOUTH, SOUTH,
+        Direction.EAST, EAST,
         Direction.WEST, WEST,
         Direction.UP, UP,
         Direction.DOWN, DOWN
@@ -44,8 +44,8 @@ public class CableBlock extends Block {
 
     public static final Map<Direction, VoxelShape> FACING_TO_SHAPE_MAP = Map.of(
         Direction.NORTH, VoxelShapes.cuboid(0.6, 0.6, 0, 0.4, 0.4, 0.4),
-        Direction.EAST, VoxelShapes.cuboid(0.6, 0.6, 0.6, 1, 0.4, 0.4),
         Direction.SOUTH, VoxelShapes.cuboid(0.6, 0.6, 0.6, 0.4, 0.4, 1),
+        Direction.EAST, VoxelShapes.cuboid(0.6, 0.6, 0.6, 1, 0.4, 0.4),
         Direction.WEST, VoxelShapes.cuboid(0, 0.6, 0.6, 0.4, 0.4, 0.4),
         Direction.UP, VoxelShapes.cuboid(0.6, 0.6, 0.6, 0.4, 1, 0.4),
         Direction.DOWN, VoxelShapes.cuboid(0.6, 0, 0.6, 0.4, 0.4, 0.4)
@@ -91,25 +91,31 @@ public class CableBlock extends Block {
 
     public void updateModel(World world, BlockPos pos, BlockState state){
         for(Map.Entry<Direction, EnumProperty<ConnectType>> entry : FACING_TO_PROPERTY_MAP.entrySet()){
+            //when manuel disconnect with a wrench maybe
+            if (state.get(entry.getValue()) == ConnectType.DISCONNECT) continue;
             state = state.with(entry.getValue(), getConnect(world.getBlockState(pos.offset(entry.getKey()))));
         }
         world.setBlockState(pos, state);
         return;
     }
 
-    public List<Inventory> getConnectedInventories(World world, BlockPos to, BlockPos from){
+    public List<Inventory> getConnectedInventories(World world, BlockPos to, BlockPos from, int depth){
         BlockPos tempPos;
         BlockState tempBlockState;
         List<Inventory> fetchedInventories = new ArrayList<Inventory>();
-        for(Direction direction : FACING_TO_PROPERTY_MAP.keySet()){
+        //max depth reached
+        if (depth == 0) return fetchedInventories;
+
+        for(Direction direction : Direction.values()){
             tempPos = to.offset(direction);
+            //skip backtrack
             if (tempPos.equals(from)) continue;
             tempBlockState = world.getBlockState(tempPos);
 
-            if (hasInventory(tempBlockState)){
+            if (isChest(tempBlockState)){
                 fetchedInventories.add(ChestBlock.getInventory((ChestBlock) tempBlockState.getBlock(), tempBlockState, world, tempPos, false));
             }else if (isCable(tempBlockState)){
-                fetchedInventories.addAll(getConnectedInventories(world, tempPos, to));
+                fetchedInventories.addAll(getConnectedInventories(world, tempPos, to, depth - 1));
             }
         }
         return fetchedInventories;
@@ -117,12 +123,12 @@ public class CableBlock extends Block {
 
     public static ConnectType getConnect(BlockState entry){
         if (entry == null) return ConnectType.NONE;
-        if (hasInventory(entry)) return ConnectType.INVENTORY;
+        if (isChest(entry)) return ConnectType.INVENTORY;
         else if (isCable(entry)) return ConnectType.CABLE;
         else return ConnectType.NONE;
     }
 
-    public static boolean hasInventory(BlockState blockState){
+    public static boolean isChest(BlockState blockState){
         if (blockState.getBlock() instanceof ChestBlock) return true;
         else return false;
     }

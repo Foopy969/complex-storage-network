@@ -1,12 +1,10 @@
-package net.complex.storage.network;
+package net.complex.storage.network.item;
 
 import java.util.List;
-
+import net.complex.storage.network.block.CableBlock;
 import net.minecraft.block.Block;
-import net.minecraft.block.ChestBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.DoubleInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -40,7 +38,7 @@ public class TestItem extends Item {
         List<Inventory> inventories;
 
         if (Registry.BLOCK.getId(blockState.getBlock()).toString().equals("complexstorage:dataduct")){
-            inventories = ((CableBlock)block).getConnectedInventories(world, pos, null);
+            inventories = ((CableBlock)block).getConnectedInventories(world, pos, null, 16);
         }
         
         return ActionResult.PASS;

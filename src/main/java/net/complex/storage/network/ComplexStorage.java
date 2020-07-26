@@ -1,5 +1,7 @@
 package net.complex.storage.network;
 
+import net.complex.storage.network.item.TestItem;
+import net.complex.storage.network.block.CableBlock;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.Material;
