@@ -40,7 +40,7 @@ public class TestItem extends Item {
         List<Inventory> inventories;
 
         if (Registry.BLOCK.getId(blockState.getBlock()).toString().equals("complexstorage:dataduct")){
-            inventories = ((Dataduct)block).getConnectedInventories(world, pos, null);
+            inventories = ((CableBlock)block).getConnectedInventories(world, pos, null);
         }
         
         return ActionResult.PASS;
