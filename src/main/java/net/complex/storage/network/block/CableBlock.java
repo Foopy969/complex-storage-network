@@ -1,8 +1,6 @@
 package net.complex.storage.network.block;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -11,10 +9,12 @@ import blue.endless.jankson.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
+import net.minecraft.block.DoubleBlockProperties;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.util.StringIdentifiable;
@@ -98,23 +98,22 @@ public class CableBlock extends Block {
         world.setBlockState(pos, state);
     }
 
-    public Set<Inventory> getConnectedInventories(World world, BlockPos to, BlockPos from, int depth){
+    public Set<BlockPos> getConnectedInventories(World world, BlockPos to, Set<BlockPos> from){
         BlockPos tempPos;
         BlockState tempBlockState;
-        Set<Inventory> fetchedInventories = new HashSet<Inventory>();
-        //max depth reached
-        if (depth == 0) return fetchedInventories;
+        Set<BlockPos> fetchedInventories = new HashSet<BlockPos>();
 
         for(Direction direction : Direction.values()){
             tempPos = to.offset(direction);
             //skip backtrack
-            if (tempPos.equals(from)) continue;
+            if (from.contains(tempPos)) continue;
+            from.add(tempPos);
             tempBlockState = world.getBlockState(tempPos);
 
             if (isChest(tempBlockState)){
-                fetchedInventories.add(ChestBlock.getInventory((ChestBlock) tempBlockState.getBlock(), tempBlockState, world, tempPos, false));
+                fetchedInventories.add(tempPos);
             }else if (isCable(tempBlockState)){
-                fetchedInventories.addAll(getConnectedInventories(world, tempPos, to, depth - 1));
+                fetchedInventories.addAll(getConnectedInventories(world, tempPos, from));
             }else if (isMaster(tempBlockState)){
                 return fetchedInventories;
             }
