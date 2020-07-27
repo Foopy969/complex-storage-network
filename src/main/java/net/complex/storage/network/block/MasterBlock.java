@@ -6,6 +6,7 @@ import java.util.Set;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.DoubleInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.ActionResult;
@@ -24,16 +25,27 @@ public class MasterBlock extends Block {
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         if (!world.isClient) {
-            Block tempBlock;
-            BlockPos tempPos;
-            Set<BlockPos> tempSet;
-            player.sendMessage(new LiteralText("------START-----"), false);
-            for (Direction direction : Direction.values()){
-                tempPos = pos.offset(direction);
-                tempBlock = world.getBlockState(tempPos).getBlock();
-                if (tempBlock instanceof CableBlock){
-                    tempSet = ((CableBlock)tempBlock).getConnectedInventories(world, tempPos, new HashSet<BlockPos>());
-                    player.sendMessage(new LiteralText(Integer.toString(tempSet.size())), false);
+            Block block;
+            Set<BlockPos> poss = new HashSet<BlockPos>();
+            Set<Inventory> invs = new HashSet<Inventory>();
+            poss.add(pos);
+            for (Direction direction : Direction.values()) {
+                block = world.getBlockState(pos.offset(direction)).getBlock();
+                if (block instanceof CableBlock) {
+                    try {
+                        int count = 0;
+                        invs = ((CableBlock) block).getConnectedInventories(world, pos.offset(direction), poss);
+
+                        for (Inventory inv : invs){
+                            if (inv instanceof DoubleInventory) count++;
+                        }
+                        player.sendMessage(new LiteralText(String.format("DoubleChest: %d", count)), false);
+                        player.sendMessage(new LiteralText(String.format("SingleChest: %d", invs.size() - count)), false);
+
+                    } catch (Exception e) {
+                        player.sendMessage(new LiteralText(e.getMessage()), false);
+                        e.printStackTrace();
+                    }
                 }
             }
         }

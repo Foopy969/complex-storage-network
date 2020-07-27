@@ -3,15 +3,19 @@ package net.complex.storage.network.block;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import blue.endless.jankson.annotation.Nullable;
+import net.complex.storage.network.api.DoubleBlockPos;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.DoubleBlockProperties;
 import net.minecraft.block.ShapeContext;
+import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.inventory.DoubleInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
@@ -61,6 +65,24 @@ public class CableBlock extends Block {
         .with(UP, ConnectType.NONE).with(DOWN, ConnectType.NONE));
     }
 
+    static DoubleBlockProperties.PropertyRetriever<ChestBlockEntity, Optional<BlockPos>> POS_RETRIEVER;
+
+    static {
+        POS_RETRIEVER = new DoubleBlockProperties.PropertyRetriever<ChestBlockEntity, Optional<BlockPos>>() {
+            public Optional<BlockPos> getFromBoth(ChestBlockEntity chestBlockEntity, ChestBlockEntity chestBlockEntity2) {
+               return Optional.of(new DoubleBlockPos(chestBlockEntity.getPos(), chestBlockEntity2.getPos()));
+            }
+   
+            public Optional<BlockPos> getFrom(ChestBlockEntity chestBlockEntity) {
+               return Optional.of(chestBlockEntity.getPos());
+            }
+   
+            public Optional<BlockPos> getFallback() {
+               return Optional.empty();
+            }
+         };
+    }
+
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> stateManager) {
         stateManager.add(NORTH).add(SOUTH).add(EAST).add(WEST).add(UP).add(DOWN);
@@ -98,49 +120,49 @@ public class CableBlock extends Block {
         world.setBlockState(pos, state);
     }
 
-    public Set<BlockPos> getConnectedInventories(World world, BlockPos to, Set<BlockPos> from){
-        BlockPos tempPos;
-        BlockState tempBlockState;
-        Set<BlockPos> fetchedInventories = new HashSet<BlockPos>();
+    public Set<Inventory> getConnectedInventories(World world, BlockPos to, Set<BlockPos> from) throws Exception {
+        BlockPos pos;
+        BlockState blockState;
+        ChestBlock chestBlock;
+        Set<Inventory> invs = new HashSet<Inventory>();
 
-        for(Direction direction : Direction.values()){
-            tempPos = to.offset(direction);
+        for(Direction dir : Direction.values()){
+            pos = to.offset(dir);
             //skip backtrack
-            if (from.contains(tempPos)) continue;
-            from.add(tempPos);
-            tempBlockState = world.getBlockState(tempPos);
+            if (from.contains(pos)) continue;
+            from.add(pos);
+            blockState = world.getBlockState(pos);
 
-            if (isChest(tempBlockState)){
-                fetchedInventories.add(tempPos);
-            }else if (isCable(tempBlockState)){
-                fetchedInventories.addAll(getConnectedInventories(world, tempPos, from));
-            }else if (isMaster(tempBlockState)){
-                return fetchedInventories;
+            if (blockState.getBlock() instanceof ChestBlock){
+                chestBlock = (ChestBlock) blockState.getBlock();
+                invs.add(ChestBlock.getInventory(chestBlock, blockState, world, pos, false));
+                if (isDoubleChest(world, pos)){
+                    from.add(getConnectedChestPos(chestBlock, blockState, world, pos));
+                }
+            }else if (blockState.getBlock() instanceof CableBlock){
+                invs.addAll(getConnectedInventories(world, pos, from));
+            }else if (blockState.getBlock() instanceof MasterBlock){
+                throw new Exception("More than one master block in a storage network.");
             }
         }
-        return fetchedInventories;
+        return invs;
     }
 
-    public static ConnectType getConnect(BlockState entry){
-        if (entry == null) return ConnectType.NONE;
-        if (isChest(entry)) return ConnectType.INVENTORY;
-        else if (isCable(entry) || isMaster(entry)) return ConnectType.CABLE;
+    public static BlockPos getConnectedChestPos(ChestBlock chestBlock, BlockState blockState, World world, BlockPos pos){
+        DoubleBlockPos chestPos = (DoubleBlockPos) chestBlock.getBlockEntitySource(blockState, world, pos, false).apply(POS_RETRIEVER).orElse((DoubleBlockPos) null);
+        if (pos.equals(chestPos)) return chestPos.pos2;
+        else return chestPos;
+    }
+
+    public static boolean isDoubleChest(World world, BlockPos pos){
+        return ChestBlock.getInventory((ChestBlock) world.getBlockState(pos).getBlock(), world.getBlockState(pos), world, pos, false) instanceof DoubleInventory;
+    }
+
+    public static ConnectType getConnect(BlockState blockState){
+        if (blockState == null) return ConnectType.NONE;
+        if (blockState.getBlock() instanceof ChestBlock) return ConnectType.INVENTORY;
+        else if (blockState.getBlock() instanceof CableBlock || blockState.getBlock() instanceof MasterBlock) return ConnectType.CABLE;
         else return ConnectType.NONE;
-    }
-
-    public static boolean isChest(BlockState blockState){
-        if (blockState.getBlock() instanceof ChestBlock) return true;
-        else return false;
-    }
-
-    public static boolean isCable(BlockState blockState){
-        if (blockState.getBlock() instanceof CableBlock) return true;
-        else return false;
-    }
-
-    public static boolean isMaster(BlockState blockState){
-        if (blockState.getBlock() instanceof MasterBlock) return true;
-        else return false;
     }
 
     public enum ConnectType implements StringIdentifiable{
