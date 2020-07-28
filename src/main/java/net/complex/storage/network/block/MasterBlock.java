@@ -34,7 +34,7 @@ public class MasterBlock extends Block {
                 if (block instanceof CableBlock) {
                     try {
                         int count = 0;
-                        invs = ((CableBlock) block).getConnectedInventories(world, pos.offset(direction), poss);
+                        invs = CableBlock.getConnectedInvs(world, pos.offset(direction), poss);
 
                         for (Inventory inv : invs){
                             if (inv instanceof DoubleInventory) count++;
@@ -50,5 +50,10 @@ public class MasterBlock extends Block {
             }
         }
         return ActionResult.SUCCESS;
+    }
+
+    public Inventory getMergedInv(){
+        
+        return null;
     }
 }

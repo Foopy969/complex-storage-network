@@ -18,7 +18,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.inventory.DoubleInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.util.StringIdentifiable;
@@ -111,7 +110,7 @@ public class CableBlock extends Block {
         return CENTER_SHAPE.simplify();
     }
 
-    public void updateModel(World world, BlockPos pos, BlockState state){
+    public static void updateModel(World world, BlockPos pos, BlockState state){
         for(Map.Entry<Direction, EnumProperty<ConnectType>> entry : FACING_TO_PROPERTY_MAP.entrySet()){
             //when manuel disconnect with a wrench maybe
             if (state.get(entry.getValue()) == ConnectType.DISCONNECT) continue;
@@ -120,10 +119,12 @@ public class CableBlock extends Block {
         world.setBlockState(pos, state);
     }
 
-    public Set<Inventory> getConnectedInventories(World world, BlockPos to, Set<BlockPos> from) throws Exception {
+    public static Set<Inventory> getConnectedInvs(World world, BlockPos to, Set<BlockPos> from) throws Exception {
         BlockPos pos;
         BlockState blockState;
+        Block block;
         ChestBlock chestBlock;
+        Inventory inv;
         Set<Inventory> invs = new HashSet<Inventory>();
 
         for(Direction dir : Direction.values()){
@@ -132,30 +133,28 @@ public class CableBlock extends Block {
             if (from.contains(pos)) continue;
             from.add(pos);
             blockState = world.getBlockState(pos);
+            block = blockState.getBlock();
 
-            if (blockState.getBlock() instanceof ChestBlock){
-                chestBlock = (ChestBlock) blockState.getBlock();
-                invs.add(ChestBlock.getInventory(chestBlock, blockState, world, pos, false));
-                if (isDoubleChest(world, pos)){
-                    from.add(getConnectedChestPos(chestBlock, blockState, world, pos));
+            if (block instanceof ChestBlock){
+                chestBlock = (ChestBlock) block;
+                inv = ChestBlock.getInventory(chestBlock, blockState, world, pos, false);
+                invs.add(inv);
+                if (inv instanceof DoubleInventory){
+                    from.add(getDoubleBlockPos(chestBlock, blockState, world, pos));
                 }
-            }else if (blockState.getBlock() instanceof CableBlock){
-                invs.addAll(getConnectedInventories(world, pos, from));
-            }else if (blockState.getBlock() instanceof MasterBlock){
+            }else if (block instanceof CableBlock){
+                invs.addAll(getConnectedInvs(world, pos, from));
+            }else if (block instanceof MasterBlock){
                 throw new Exception("More than one master block in a storage network.");
             }
         }
         return invs;
     }
 
-    public static BlockPos getConnectedChestPos(ChestBlock chestBlock, BlockState blockState, World world, BlockPos pos){
+    public static BlockPos getDoubleBlockPos(ChestBlock chestBlock, BlockState blockState, World world, BlockPos pos){
         DoubleBlockPos chestPos = (DoubleBlockPos) chestBlock.getBlockEntitySource(blockState, world, pos, false).apply(POS_RETRIEVER).orElse((DoubleBlockPos) null);
-        if (pos.equals(chestPos)) return chestPos.pos2;
+        if (pos.equals(chestPos)) return chestPos.pos;
         else return chestPos;
-    }
-
-    public static boolean isDoubleChest(World world, BlockPos pos){
-        return ChestBlock.getInventory((ChestBlock) world.getBlockState(pos).getBlock(), world.getBlockState(pos), world, pos, false) instanceof DoubleInventory;
     }
 
     public static ConnectType getConnect(BlockState blockState){
