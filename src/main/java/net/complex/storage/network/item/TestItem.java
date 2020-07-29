@@ -22,6 +22,9 @@ public class TestItem extends Item {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand) {
+        if (!world.isClient) {
+            MinecraftClient.getInstance().openScreen(new TestScreen(new TestGui()));
+        }
         MinecraftClient.getInstance().openScreen(new TestScreen(new TestGui()));
         return new TypedActionResult<>(ActionResult.SUCCESS, playerEntity.getStackInHand(hand));
     }
