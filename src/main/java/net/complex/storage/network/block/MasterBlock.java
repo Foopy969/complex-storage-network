@@ -5,11 +5,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
 import net.complex.storage.network.api.Trash;
+import net.complex.storage.network.gui.TestScreen;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.DoubleInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
@@ -20,29 +22,31 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class MasterBlock extends Block{
+public class MasterBlock extends Block {
 
     public MasterBlock(Settings settings) {
         super(settings);
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand,
+            BlockHitResult hit) {
         if (!world.isClient) {
+            Inventory inv = new SimpleInventory(0);
             try {
-                setMergedInv(world, pos);
+                inv = getMergedInv(world, pos);
             } catch (Exception e) {
                 player.sendMessage(new LiteralText(e.getMessage()), false);
                 e.printStackTrace();
             } finally {
-
+                MinecraftClient.getInstance().openScreen(new TestScreen("test"));
             }
             return ActionResult.CONSUME;
         }
         return ActionResult.SUCCESS;
     }
 
-    public Inventory setMergedInv(World world, BlockPos pos) throws Exception {
+    public Inventory getMergedInv(World world, BlockPos pos) throws Exception {
         Set<BlockPos> poss = new HashSet<BlockPos>();
         List<ItemStack> itemStack = new ArrayList<ItemStack>();
         poss.add(pos);
@@ -50,6 +54,6 @@ public class MasterBlock extends Block{
         for (Inventory item : CableBlock.getConnectedInvs(world, pos, poss)){
             itemStack.addAll(Trash.getItems(item));
         }
-        return new SimpleInventory((ItemStack[]) itemStack.toArray());
+        return new SimpleInventory(itemStack.toArray(new ItemStack[0]));
     }
 }
