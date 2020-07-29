@@ -22,23 +22,13 @@ public class TestItem extends Item {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand) {
-        if (!world.isClient) {
-            MinecraftClient.getInstance().openScreen(new TestScreen(new TestGui()));
-        }
-        MinecraftClient.getInstance().openScreen(new TestScreen(new TestGui()));
+        MinecraftClient.getInstance().openScreen(new TestScreen(new TestGui(null)));
         return new TypedActionResult<>(ActionResult.SUCCESS, playerEntity.getStackInHand(hand));
     }
 
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
-        World world = context.getWorld();
         
-        if (!world.isClient) {
-            BlockPos pos = context.getBlockPos();
-            PlayerEntity player = context.getPlayer();
-            Block block = world.getBlockState(pos).getBlock();
-        }
-
         return ActionResult.SUCCESS;
     }
 }

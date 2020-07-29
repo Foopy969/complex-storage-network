@@ -2,6 +2,7 @@ package net.complex.storage.network.api;
 
 import net.minecraft.util.math.BlockPos;
 
+//this is dumb
 public class DoubleBlockPos extends BlockPos {
     public BlockPos pos;
 

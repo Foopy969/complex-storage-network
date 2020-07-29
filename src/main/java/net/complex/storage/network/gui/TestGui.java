@@ -4,13 +4,16 @@ import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription;
 import io.github.cottonmc.cotton.gui.widget.WButton;
 import io.github.cottonmc.cotton.gui.widget.WGridPanel;
 import io.github.cottonmc.cotton.gui.widget.WLabel;
+import io.github.cottonmc.cotton.gui.widget.WPlayerInvPanel;
 import io.github.cottonmc.cotton.gui.widget.WSprite;
+import io.github.cottonmc.cotton.gui.widget.WGridPanel;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 
 public class TestGui extends LightweightGuiDescription {
-    public TestGui() {
+    public TestGui(Inventory inv) {
         WGridPanel root = new WGridPanel();
         setRootPanel(root);
         root.setSize(256, 240);
@@ -20,10 +23,12 @@ public class TestGui extends LightweightGuiDescription {
         
         WButton button = new WButton(new TranslatableText("gui.examplemod.examplebutton"));
         root.add(button, 0, 3, 4, 1);
-        
+
         WLabel label = new WLabel(new LiteralText("Test"), 0xFFFFFF);
         root.add(label, 0, 4, 2, 1);
 
         root.validate(this);
+
+
     }
 }
