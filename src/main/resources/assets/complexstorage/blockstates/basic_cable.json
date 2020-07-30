@@ -1,22 +1,22 @@
 {
   "multipart": [
     {   "apply": { "model": "complexstorage:block/cable_center" }},
-    {   "when": { "OR": [ { "north": "cable" }, { "north": "inventory" } ] },
+    {   "when": { "OR": [ { "north": "cable" }, { "north": "inventory" }, { "north": "master" } ] },
         "apply": { "model": "complexstorage:block/cable_side"}
     },
-    {   "when": { "OR": [ { "east": "cable" }, { "east": "inventory" } ] },
+    {   "when": { "OR": [ { "east": "cable" }, { "east": "inventory" }, { "east": "master" } ] },
         "apply": { "model": "complexstorage:block/cable_side", "y": 90 }
     },
-    {   "when": { "OR": [ { "south": "cable" }, { "south": "inventory" } ] },
+    {   "when": { "OR": [ { "south": "cable" }, { "south": "inventory" }, { "south": "master" } ] },
         "apply": { "model": "complexstorage:block/cable_side", "y": 180 }
     },
-    {   "when": { "OR": [ { "west": "cable" }, { "west": "inventory" } ] },
+    {   "when": { "OR": [ { "west": "cable" }, { "west": "inventory" }, { "west": "master" } ] },
         "apply": { "model": "complexstorage:block/cable_side", "y": 270 }
     },
-    {   "when": { "OR": [ { "up": "cable" }, { "up": "inventory" } ] },
+    {   "when": { "OR": [ { "up": "cable" }, { "up": "inventory" }, { "up": "master" } ] },
         "apply": { "model": "complexstorage:block/cable_side", "x": 270 }
     },
-    {   "when": { "OR": [ { "down": "cable" }, { "down": "inventory" } ] },
+    {   "when": { "OR": [ { "down": "cable" }, { "down": "inventory" }, { "down": "master" } ] },
         "apply": { "model": "complexstorage:block/cable_side", "x": 90 }
     }
   ]

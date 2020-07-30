@@ -3,17 +3,13 @@ package net.complex.storage.network.block;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
-import net.complex.storage.network.api.DoubleBlockPos;
 import net.complex.storage.network.api.Trash;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
-import net.minecraft.block.DoubleBlockProperties;
 import net.minecraft.block.ShapeContext;
-import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.inventory.DoubleInventory;
 import net.minecraft.inventory.Inventory;
@@ -97,12 +93,14 @@ public class CableBlock extends Block {
         world.setBlockState(pos, state);
     }
 
-    public static Set<Inventory> getConnectedInvs(World world, BlockPos to, Set<BlockPos> from) throws Exception {
+    public static Set<Inventory> getConnectedInvs(World world, BlockPos to, Set<BlockPos> from, boolean start)
+            throws Exception {
         BlockPos pos;
         BlockState state1 = world.getBlockState(to);
         BlockState state2;
         ChestBlock chest;
         Inventory inv;
+        // someone test if using a list instead will cause any problem
         Set<Inventory> invs = new HashSet<Inventory>();
 
         for (Direction dir : Direction.values()) {
@@ -111,25 +109,31 @@ public class CableBlock extends Block {
             if (from.contains(pos))
                 continue;
             from.add(pos);
+            state2 = world.getBlockState(pos);
 
-            switch (state1.get(FACING_TO_PROPERTY_MAP.get(dir))) {
-                case MASTER:
-                    throw new Exception("More than one master block in a storage network.");
-                case CABLE:
-                    invs.addAll(getConnectedInvs(world, pos, from));
-                    break;
-                case INVENTORY:
-                    state2 = world.getBlockState(pos);
-                    chest = (ChestBlock) state2.getBlock();
-                    inv = ChestBlock.getInventory(chest, state2, world, pos, false);
-                    invs.add(inv);
-                    if (inv instanceof DoubleInventory) {
-                        from.add(Trash.getDoubleBlockPos(chest, state2, world, pos));
-                    }
-                    break;
-                default:
-                    // not not connected
-                    break;
+            if (start) {
+                if (state2.getBlock() instanceof CableBlock) {
+                    // someone think of a better fix than this
+                    invs.addAll(getConnectedInvs(world, pos, from, false));
+                }
+            } else {
+                switch (state1.get(FACING_TO_PROPERTY_MAP.get(dir))) {
+                    case MASTER:
+                        throw new Exception("More than one master block in a storage network.");
+                    case CABLE:
+                        invs.addAll(getConnectedInvs(world, pos, from, false));
+                        break;
+                    case INVENTORY:
+                        chest = (ChestBlock) state2.getBlock();
+                        inv = ChestBlock.getInventory(chest, state2, world, pos, false);
+                        invs.add(inv);
+                        if (inv instanceof DoubleInventory)
+                            from.add(Trash.getDoubleBlockPos(chest, state2, world, pos));
+                        break;
+                    default:
+                        // not connected
+                        break;
+                }
             }
         }
         return invs;
@@ -153,7 +157,7 @@ public class CableBlock extends Block {
         NONE, CABLE, INVENTORY, DISCONNECT, MASTER;
 
         public boolean isConnected() {
-            if (this.equals(CABLE) || this.equals(INVENTORY))
+            if (this.equals(CABLE) || this.equals(INVENTORY) || this.equals(MASTER))
                 return true;
             else
                 return false;

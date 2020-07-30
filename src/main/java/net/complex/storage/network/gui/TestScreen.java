@@ -1,41 +1,48 @@
 package net.complex.storage.network.gui;
 
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ScreenTexts;
-import net.minecraft.client.gui.widget.ButtonWidget;
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
-public class TestScreen extends Screen {
+@Environment(EnvType.CLIENT)
+public class TestScreen extends HandledScreen<TestScreenHandler> implements ScreenHandlerProvider<TestScreenHandler> {
+    //change this to new gui
+    private static final Identifier TEXTURE = new Identifier("textures/gui/container/generic_54.png");
 
-    public TestScreen() {
-        super(new LiteralText("Title"));
-    }
-    
-    @Override
-    public boolean isPauseScreen() { 
-        return false; 
+    public TestScreen(TestScreenHandler handler, PlayerInventory inventory, Text title) {
+        super(handler, inventory, title);
+        this.passEvents = false;
+        this.backgroundHeight = 114 + 6 * 18;
+        this.playerInventoryTitleY = this.backgroundHeight - 94;
     }
 
-    @Override
-    protected void init() {
-        this.addCloseButton();
-    }
-    
-    @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta){
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        this.renderBackground(matrices);
         super.render(matrices, mouseX, mouseY, delta);
+        this.drawMouseoverTooltip(matrices, mouseX, mouseY);
     }
 
-    @Override
-    public void renderBackground(MatrixStack matrices, int vOffset) {
-        super.renderBackground(matrices, vOffset);
+    protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        this.client.getTextureManager().bindTexture(TEXTURE);
+        int i = (this.width - this.backgroundWidth) / 2;
+        int j = (this.height - this.backgroundHeight) / 2;
+        this.drawTexture(matrices, i, j, 0, 0, this.backgroundWidth, 6 * 18 + 17);
+        this.drawTexture(matrices, i, j + 6 * 18 + 17, 0, 126, this.backgroundWidth, 96);
     }
 
-    protected void addCloseButton() {
-        this.addButton(new ButtonWidget(this.width / 2 - 100, 196, 200, 20, ScreenTexts.DONE, (buttonWidget) -> {
-           this.client.openScreen((Screen)null);
-        }));
+    public static TestScreen create(Inventory inventory, PlayerInventory playerInventory) {
+        return new TestScreen(TestScreenHandler.create(inventory, playerInventory), playerInventory,
+                new LiteralText("Test"));
     }
+
+    //override scroll down event or add a scrollbar
 }

@@ -19,33 +19,37 @@ public class Trash {
 
     static {
         POS_RETRIEVER = new DoubleBlockProperties.PropertyRetriever<ChestBlockEntity, Optional<BlockPos>>() {
-            public Optional<BlockPos> getFromBoth(ChestBlockEntity chestBlockEntity, ChestBlockEntity chestBlockEntity2) {
-               return Optional.of(new DoubleBlockPos(chestBlockEntity.getPos(), chestBlockEntity2.getPos()));
+            public Optional<BlockPos> getFromBoth(ChestBlockEntity chestBlockEntity,
+                    ChestBlockEntity chestBlockEntity2) {
+                return Optional.of(new DoubleBlockPos(chestBlockEntity.getPos(), chestBlockEntity2.getPos()));
             }
-   
+
             public Optional<BlockPos> getFrom(ChestBlockEntity chestBlockEntity) {
-               return Optional.of(chestBlockEntity.getPos());
+                return Optional.of(chestBlockEntity.getPos());
             }
-   
+
             public Optional<BlockPos> getFallback() {
-               return Optional.empty();
+                return Optional.empty();
             }
-         };
+        };
     }
 
-    public static List<ItemStack> getItems(Inventory inv){
+    public static List<ItemStack> getItems(Inventory inv) {
         List<ItemStack> itemStack = new ArrayList<ItemStack>();
-        for (int i = 0; i < inv.size(); i++){
-            if (!inv.getStack(i).isEmpty()){
+        for (int i = 0; i < inv.size(); i++) {
+            if (!inv.getStack(i).isEmpty()) {
                 itemStack.add(inv.getStack(i));
             }
         }
         return itemStack;
     }
 
-    public static BlockPos getDoubleBlockPos(ChestBlock chestBlock, BlockState blockState, World world, BlockPos pos){
-        DoubleBlockPos chestPos = (DoubleBlockPos) chestBlock.getBlockEntitySource(blockState, world, pos, false).apply(POS_RETRIEVER).orElse((DoubleBlockPos) null);
-        if (pos.equals(chestPos)) return chestPos.pos;
-        else return chestPos;
+    public static BlockPos getDoubleBlockPos(ChestBlock chestBlock, BlockState blockState, World world, BlockPos pos) {
+        DoubleBlockPos chestPos = (DoubleBlockPos) chestBlock.getBlockEntitySource(blockState, world, pos, false)
+                .apply(POS_RETRIEVER).orElse((DoubleBlockPos) null);
+        if (pos.equals(chestPos))
+            return chestPos.pos;
+        else
+            return chestPos;
     }
 }

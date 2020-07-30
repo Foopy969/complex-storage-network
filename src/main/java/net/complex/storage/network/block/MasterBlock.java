@@ -1,19 +1,27 @@
 package net.complex.storage.network.block;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import net.complex.storage.network.ComplexStorage;
 import net.complex.storage.network.api.Trash;
 import net.complex.storage.network.gui.TestScreen;
+import net.complex.storage.network.gui.TestScreenHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.GenericContainerScreenHandler;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -38,7 +46,7 @@ public class MasterBlock extends Block {
                 player.sendMessage(new LiteralText(e.getMessage()), false);
                 e.printStackTrace();
             } finally {
-                MinecraftClient.getInstance().openScreen(new TestScreen());
+                MinecraftClient.getInstance().openScreen(TestScreen.create(inv, player.inventory));
             }
             return ActionResult.CONSUME;
         }
@@ -46,11 +54,10 @@ public class MasterBlock extends Block {
     }
 
     public Inventory getMergedInv(World world, BlockPos pos) throws Exception {
-        Set<BlockPos> poss = new HashSet<BlockPos>();
+        Set<BlockPos> poss = new HashSet<BlockPos>(Arrays.asList(pos));
         List<ItemStack> itemStack = new ArrayList<ItemStack>();
-        poss.add(pos);
 
-        for (Inventory item : CableBlock.getConnectedInvs(world, pos, poss)){
+        for (Inventory item : CableBlock.getConnectedInvs(world, pos, poss, true)) {
             itemStack.addAll(Trash.getItems(item));
         }
         return new SimpleInventory(itemStack.toArray(new ItemStack[0]));

@@ -22,7 +22,7 @@ public class TestItem extends Item {
 
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
-        
+
         return ActionResult.SUCCESS;
     }
 }
