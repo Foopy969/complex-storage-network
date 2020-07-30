@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
 import net.complex.storage.network.api.Trash;
 import net.complex.storage.network.gui.TestScreen;
 import net.minecraft.block.Block;
@@ -39,7 +38,7 @@ public class MasterBlock extends Block {
                 player.sendMessage(new LiteralText(e.getMessage()), false);
                 e.printStackTrace();
             } finally {
-                MinecraftClient.getInstance().openScreen(new TestScreen("test"));
+                MinecraftClient.getInstance().openScreen(new TestScreen());
             }
             return ActionResult.CONSUME;
         }

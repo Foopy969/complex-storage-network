@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import blue.endless.jankson.annotation.Nullable;
 import net.complex.storage.network.api.DoubleBlockPos;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -88,7 +87,7 @@ public class CableBlock extends Block {
     }
 
     @Override
-    public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
+    public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack) {
         updateModel(world, pos, state);
         world.updateNeighborsAlways(pos, this);
     }
