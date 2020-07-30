@@ -1,7 +1,5 @@
 package net.complex.storage.network.item;
 
-import net.complex.storage.network.gui.TestScreen;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;

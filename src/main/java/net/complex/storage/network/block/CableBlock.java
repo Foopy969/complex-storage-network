@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import net.complex.storage.network.api.DoubleBlockPos;
+import net.complex.storage.network.api.Trash;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
@@ -37,48 +38,23 @@ public class CableBlock extends Block {
     public static final EnumProperty<ConnectType> UP = EnumProperty.of("up", ConnectType.class);
     public static final EnumProperty<ConnectType> DOWN = EnumProperty.of("down", ConnectType.class);
 
-    public static final Map<Direction, EnumProperty<ConnectType>> FACING_TO_PROPERTY_MAP = Map.of(
-        Direction.NORTH, NORTH,
-        Direction.SOUTH, SOUTH,
-        Direction.EAST, EAST,
-        Direction.WEST, WEST,
-        Direction.UP, UP,
-        Direction.DOWN, DOWN
-    );
+    public static final Map<Direction, EnumProperty<ConnectType>> FACING_TO_PROPERTY_MAP = Map.of(Direction.NORTH,
+            NORTH, Direction.SOUTH, SOUTH, Direction.EAST, EAST, Direction.WEST, WEST, Direction.UP, UP, Direction.DOWN,
+            DOWN);
 
-    public static final Map<Direction, VoxelShape> FACING_TO_SHAPE_MAP = Map.of(
-        Direction.NORTH, VoxelShapes.cuboid(0.6, 0.6, 0, 0.4, 0.4, 0.4),
-        Direction.SOUTH, VoxelShapes.cuboid(0.6, 0.6, 0.6, 0.4, 0.4, 1),
-        Direction.EAST, VoxelShapes.cuboid(0.6, 0.6, 0.6, 1, 0.4, 0.4),
-        Direction.WEST, VoxelShapes.cuboid(0, 0.6, 0.6, 0.4, 0.4, 0.4),
-        Direction.UP, VoxelShapes.cuboid(0.6, 0.6, 0.6, 0.4, 1, 0.4),
-        Direction.DOWN, VoxelShapes.cuboid(0.6, 0, 0.6, 0.4, 0.4, 0.4)
-    );
+    public static final Map<Direction, VoxelShape> FACING_TO_SHAPE_MAP = Map.of(Direction.NORTH,
+            VoxelShapes.cuboid(0.6, 0.6, 0, 0.4, 0.4, 0.4), Direction.SOUTH,
+            VoxelShapes.cuboid(0.6, 0.6, 0.6, 0.4, 0.4, 1), Direction.EAST,
+            VoxelShapes.cuboid(0.6, 0.6, 0.6, 1, 0.4, 0.4), Direction.WEST,
+            VoxelShapes.cuboid(0, 0.6, 0.6, 0.4, 0.4, 0.4), Direction.UP,
+            VoxelShapes.cuboid(0.6, 0.6, 0.6, 0.4, 1, 0.4), Direction.DOWN,
+            VoxelShapes.cuboid(0.6, 0, 0.6, 0.4, 0.4, 0.4));
 
     public CableBlock(Settings settings) {
         super(settings);
-        setDefaultState(getStateManager().getDefaultState()
-        .with(NORTH, ConnectType.NONE).with(SOUTH, ConnectType.NONE)
-        .with(EAST, ConnectType.NONE).with(WEST, ConnectType.NONE)
-        .with(UP, ConnectType.NONE).with(DOWN, ConnectType.NONE));
-    }
-
-    static DoubleBlockProperties.PropertyRetriever<ChestBlockEntity, Optional<BlockPos>> POS_RETRIEVER;
-
-    static {
-        POS_RETRIEVER = new DoubleBlockProperties.PropertyRetriever<ChestBlockEntity, Optional<BlockPos>>() {
-            public Optional<BlockPos> getFromBoth(ChestBlockEntity chestBlockEntity, ChestBlockEntity chestBlockEntity2) {
-               return Optional.of(new DoubleBlockPos(chestBlockEntity.getPos(), chestBlockEntity2.getPos()));
-            }
-   
-            public Optional<BlockPos> getFrom(ChestBlockEntity chestBlockEntity) {
-               return Optional.of(chestBlockEntity.getPos());
-            }
-   
-            public Optional<BlockPos> getFallback() {
-               return Optional.empty();
-            }
-         };
+        setDefaultState(getStateManager().getDefaultState().with(NORTH, ConnectType.NONE).with(SOUTH, ConnectType.NONE)
+                .with(EAST, ConnectType.NONE).with(WEST, ConnectType.NONE).with(UP, ConnectType.NONE)
+                .with(DOWN, ConnectType.NONE));
     }
 
     @Override
@@ -91,9 +67,10 @@ public class CableBlock extends Block {
         updateModel(world, pos, state);
         world.updateNeighborsAlways(pos, this);
     }
-    
+
     @Override
-    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify) {
+    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos,
+            boolean notify) {
         updateModel(world, pos, state);
     }
 
@@ -101,18 +78,20 @@ public class CableBlock extends Block {
     public VoxelShape getOutlineShape(BlockState state, BlockView view, BlockPos pos, ShapeContext entityPos) {
         VoxelShape CENTER_SHAPE = VoxelShapes.cuboid(0.6, 0.6, 0.6, 0.4, 0.4, 0.4);
 
-        for(Map.Entry<Direction, EnumProperty<ConnectType>> entry : FACING_TO_PROPERTY_MAP.entrySet()){
-            if (state.get(entry.getValue()).isConnected()){
-                CENTER_SHAPE = VoxelShapes.combine(CENTER_SHAPE, FACING_TO_SHAPE_MAP.get(entry.getKey()), BooleanBiFunction.OR);
+        for (Map.Entry<Direction, EnumProperty<ConnectType>> entry : FACING_TO_PROPERTY_MAP.entrySet()) {
+            if (state.get(entry.getValue()).isConnected()) {
+                CENTER_SHAPE = VoxelShapes.combine(CENTER_SHAPE, FACING_TO_SHAPE_MAP.get(entry.getKey()),
+                        BooleanBiFunction.OR);
             }
         }
         return CENTER_SHAPE.simplify();
     }
 
-    public static void updateModel(World world, BlockPos pos, BlockState state){
-        for(Map.Entry<Direction, EnumProperty<ConnectType>> entry : FACING_TO_PROPERTY_MAP.entrySet()){
-            //when manuel disconnect with a wrench maybe
-            if (state.get(entry.getValue()) == ConnectType.DISCONNECT) continue;
+    public static void updateModel(World world, BlockPos pos, BlockState state) {
+        for (Map.Entry<Direction, EnumProperty<ConnectType>> entry : FACING_TO_PROPERTY_MAP.entrySet()) {
+            // when manuel disconnect with a wrench maybe
+            if (state.get(entry.getValue()) == ConnectType.DISCONNECT)
+                continue;
             state = state.with(entry.getValue(), getConnect(world.getBlockState(pos.offset(entry.getKey()))));
         }
         world.setBlockState(pos, state);
@@ -120,55 +99,64 @@ public class CableBlock extends Block {
 
     public static Set<Inventory> getConnectedInvs(World world, BlockPos to, Set<BlockPos> from) throws Exception {
         BlockPos pos;
-        BlockState blockState;
-        Block block;
-        ChestBlock chestBlock;
+        BlockState state1 = world.getBlockState(to);
+        BlockState state2;
+        ChestBlock chest;
         Inventory inv;
         Set<Inventory> invs = new HashSet<Inventory>();
 
-        for(Direction dir : Direction.values()){
+        for (Direction dir : Direction.values()) {
             pos = to.offset(dir);
-            //skip backtrack
-            if (from.contains(pos)) continue;
+            // skip backtrack
+            if (from.contains(pos))
+                continue;
             from.add(pos);
-            blockState = world.getBlockState(pos);
-            block = blockState.getBlock();
 
-            if (block instanceof ChestBlock){
-                chestBlock = (ChestBlock) block;
-                inv = ChestBlock.getInventory(chestBlock, blockState, world, pos, false);
-                invs.add(inv);
-                if (inv instanceof DoubleInventory){
-                    from.add(getDoubleBlockPos(chestBlock, blockState, world, pos));
-                }
-            }else if (block instanceof CableBlock){
-                invs.addAll(getConnectedInvs(world, pos, from));
-            }else if (block instanceof MasterBlock){
-                throw new Exception("More than one master block in a storage network.");
+            switch (state1.get(FACING_TO_PROPERTY_MAP.get(dir))) {
+                case MASTER:
+                    throw new Exception("More than one master block in a storage network.");
+                case CABLE:
+                    invs.addAll(getConnectedInvs(world, pos, from));
+                    break;
+                case INVENTORY:
+                    state2 = world.getBlockState(pos);
+                    chest = (ChestBlock) state2.getBlock();
+                    inv = ChestBlock.getInventory(chest, state2, world, pos, false);
+                    invs.add(inv);
+                    if (inv instanceof DoubleInventory) {
+                        from.add(Trash.getDoubleBlockPos(chest, state2, world, pos));
+                    }
+                    break;
+                default:
+                    // not not connected
+                    break;
             }
         }
         return invs;
     }
 
-    public static BlockPos getDoubleBlockPos(ChestBlock chestBlock, BlockState blockState, World world, BlockPos pos){
-        DoubleBlockPos chestPos = (DoubleBlockPos) chestBlock.getBlockEntitySource(blockState, world, pos, false).apply(POS_RETRIEVER).orElse((DoubleBlockPos) null);
-        if (pos.equals(chestPos)) return chestPos.pos;
-        else return chestPos;
+    // someone need to fix this
+    public static ConnectType getConnect(BlockState blockState) {
+        if (blockState == null)
+            return ConnectType.NONE;
+        else if (blockState.getBlock() instanceof ChestBlock)
+            return ConnectType.INVENTORY;
+        else if (blockState.getBlock() instanceof CableBlock)
+            return ConnectType.CABLE;
+        else if (blockState.getBlock() instanceof MasterBlock)
+            return ConnectType.MASTER;
+        else
+            return ConnectType.NONE;
     }
 
-    public static ConnectType getConnect(BlockState blockState){
-        if (blockState == null) return ConnectType.NONE;
-        if (blockState.getBlock() instanceof ChestBlock) return ConnectType.INVENTORY;
-        else if (blockState.getBlock() instanceof CableBlock || blockState.getBlock() instanceof MasterBlock) return ConnectType.CABLE;
-        else return ConnectType.NONE;
-    }
+    public enum ConnectType implements StringIdentifiable {
+        NONE, CABLE, INVENTORY, DISCONNECT, MASTER;
 
-    public enum ConnectType implements StringIdentifiable{
-        NONE, CABLE, INVENTORY, DISCONNECT;
-
-        public boolean isConnected(){
-            if (this.equals(CABLE) || this.equals(INVENTORY)) return true;
-            else return false;
+        public boolean isConnected() {
+            if (this.equals(CABLE) || this.equals(INVENTORY))
+                return true;
+            else
+                return false;
         }
 
         @Override

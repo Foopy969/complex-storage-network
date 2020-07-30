@@ -3,6 +3,7 @@ package net.complex.storage.network.gui;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ScreenTexts;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.text.LiteralText;
 
@@ -17,12 +18,19 @@ public class TestScreen extends Screen {
         return false; 
     }
 
+    @Override
     protected void init() {
         this.addCloseButton();
     }
     
-    public void render(){
-        
+    @Override
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta){
+        super.render(matrices, mouseX, mouseY, delta);
+    }
+
+    @Override
+    public void renderBackground(MatrixStack matrices, int vOffset) {
+        super.renderBackground(matrices, vOffset);
     }
 
     protected void addCloseButton() {
