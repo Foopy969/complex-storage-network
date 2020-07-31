@@ -5,6 +5,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import net.complex.storage.network.ComplexStorage;
 import net.complex.storage.network.api.Trash;
@@ -55,11 +58,20 @@ public class MasterBlock extends Block {
 
     public Inventory getMergedInv(World world, BlockPos pos) throws Exception {
         Set<BlockPos> poss = new HashSet<BlockPos>(Arrays.asList(pos));
-        List<ItemStack> itemStack = new ArrayList<ItemStack>();
+        List<ItemStack> itemStacks = new ArrayList<ItemStack>();
+        int index = -1;
 
-        for (Inventory item : CableBlock.getConnectedInvs(world, pos, poss, true)) {
-            itemStack.addAll(Trash.getItems(item));
+        for (Inventory items : CableBlock.getConnectedInvs(world, pos, poss, true)) {
+            for (ItemStack item : Trash.getItems(items)) {
+                //item merge section, fix bug if found
+                if (itemStacks.stream().anyMatch(x -> x.getItem().equals(item.getItem()))) {
+                    index = IntStream.range(0, itemStacks.size()).filter(i -> itemStacks.get(i).getItem().equals(item.getItem())).findFirst().orElse(-1);
+                    itemStacks.get(index).setCount(itemStacks.get(index).getCount() + item.getCount());
+                }else{
+                    itemStacks.add(new ItemStack(item.getItem(), item.getCount()));
+                }
+            }
         }
-        return new SimpleInventory(itemStack.toArray(new ItemStack[0]));
+        return new SimpleInventory(itemStacks.toArray(new ItemStack[0]));
     }
 }

@@ -4,7 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
@@ -13,7 +12,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 @Environment(EnvType.CLIENT)
-public class TestScreen extends HandledScreen<TestScreenHandler> implements ScreenHandlerProvider<TestScreenHandler> {
+public class TestScreen extends HandledScreen<TestScreenHandler> {
     //change this to new gui
     private static final Identifier TEXTURE = new Identifier("textures/gui/container/generic_54.png");
 
